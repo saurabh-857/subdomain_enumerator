@@ -1,0 +1,11 @@
+[package]
+name = "subdomain_enumerator"       # binary name
+version = "0.1.0"                   # project version
+edition = "2024"                    # rust edition
+authors = ["Saurabh Soni <saurabh@mail.com>"]
+description = "Subdomain enumerator tool"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+trust-dns-resolver = "0.20.0"
