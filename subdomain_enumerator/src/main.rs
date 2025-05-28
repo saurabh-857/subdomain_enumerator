@@ -3,6 +3,7 @@ use trust_dns_resolver::{
     config::{ResolverConfig, ResolverOpts},
     TokioAsyncResolver,
 };
+// use std::io::Write;
 
 #[derive(Parser)]
 #[command(
@@ -20,14 +21,7 @@ struct Args{
         // default_value = "example.com",
         help = "Target domain to enumerate (e.g., 'example.com')"
     )]
-    domain: String,
-
-    #[arg(
-        long,
-        short = 'w',
-        help = "Path to subdomain wordlist file"
-    )]
-    wordlist: Option<String>,
+    domain: String
 }
 
 #[tokio::main]
@@ -43,10 +37,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
     println!("[+] DNS resolver initialized: {:?}", resolver);
 
-    let lookup = resolver.lookup_ip(format!("www.{}", args.domain)).await?;
-    println!("[+] Found IP addresses for {} are: ", args.domain);
+    let lookup = resolver.lookup_ip(format!("{}", args.domain)).await?;
+    println!("\n[+] Found IP addresses for {} are: ", args.domain);
     for ip in lookup.iter() {
         println!(" - {}", ip);
+    }
+    
+    let common_subdomains = vec!["www", "mail", "ftp", "login", "api", "test", "help", "support", "docs", "pay", "billing", "mobile", "m"];
+
+    for subdomain in common_subdomains {
+        match resolver.lookup_ip(format!("{}.{}", subdomain, args.domain)).await {
+            Ok(lookup) => {
+                println!{"\n[+] Found IP address for {}.{} are:", subdomain, args.domain};
+                for ip in lookup.iter() {
+                    println!(" - {}", ip);
+                }
+            }
+            Err(e) => println!("\n[!] Error resolving {}.{}: {}", subdomain, args.domain, e),
+        }
     }
 
     Ok(())
