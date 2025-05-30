@@ -3,7 +3,8 @@ use trust_dns_resolver::{
     config::{ResolverConfig, ResolverOpts},
     TokioAsyncResolver,
 };
-// use std::io::Write;
+use std::fs::File;
+use std::io::Write;
 
 #[derive(Parser)]
 #[command(
@@ -13,21 +14,21 @@ use trust_dns_resolver::{
     long_about = None,
     help_template = "\n\n{bin} {version}\n{author}\n{about}\n\n{usage}\n\n{all-args}\n"
 )]
-struct Args{
+struct Args {
     #[arg(
         long,
         short = 'd',
         required = true,
-        // default_value = "example.com",
         help = "Target domain to enumerate (e.g., 'example.com')"
     )]
-    domain: String
+    domain: String,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-
     let args = Args::parse();
+
+    let mut output_file = File::create("subdomains.txt")?;
 
     println!("\n[+] Target domain: {}", args.domain);
 
@@ -37,25 +38,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
     println!("[+] DNS resolver initialized: {:?}", resolver);
 
-    let lookup = resolver.lookup_ip(format!("{}", args.domain)).await?;
-    println!("\n[+] Found IP addresses for {} are: ", args.domain);
-    for ip in lookup.iter() {
-        println!(" - {}", ip);
-    }
-    
+    let root_domain = format!("{}", args.domain);
+    resolve_subdomain(&resolver, &root_domain, &mut output_file).await?;
+
     let common_subdomains = vec!["www", "mail", "ftp", "login", "api", "test", "help", "support", "docs", "pay", "billing", "mobile", "m"];
 
     for subdomain in common_subdomains {
-        match resolver.lookup_ip(format!("{}.{}", subdomain, args.domain)).await {
-            Ok(lookup) => {
-                println!{"\n[+] Found IP address for {}.{} are:", subdomain, args.domain};
-                for ip in lookup.iter() {
-                    println!(" - {}", ip);
-                }
-            }
-            Err(e) => println!("\n[!] Error resolving {}.{}: {}", subdomain, args.domain, e),
-        }
+        let fqdn = format!("{}.{}", subdomain, args.domain);
+        resolve_subdomain(&resolver, &fqdn, &mut output_file).await?;
     }
 
+    Ok(())
+}
+
+async fn resolve_subdomain (
+    resolver: &TokioAsyncResolver,
+    fqdn: &str,
+    output_file: &mut File,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match resolver.lookup_ip(fqdn).await {
+        Ok(lookup) => {
+            // println!("\n[+] Found IP address for {}.{} are:", subdomain, domain);
+            for ip in lookup.iter() {
+                println!("{} -> {}", fqdn, ip);
+                writeln!(output_file, "{} -> {}", fqdn, ip)?;
+            }
+        }
+        Err(_) => {},
+    }
     Ok(())
 }
