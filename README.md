@@ -33,4 +33,4 @@ cd subdomain_enumerator
 	Replace `example.com` with the domain you want to enumerate.
 
 ### Contributing
-Contributions are welcome! Feel free to submit issues or pull requests to the Github repository.
+Contributions are welcome! Please check `CONTRIBUTING.md` to learn how to contribute to our codebase.
