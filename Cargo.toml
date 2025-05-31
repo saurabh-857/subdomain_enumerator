@@ -4,6 +4,7 @@ version = "0.1.0"                   # project version
 edition = "2024"                    # rust edition
 authors = ["Saurabh Soni <saurabh@mail.com>"]
 description = "Subdomain enumerator tool"
+license = "MIT"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
