@@ -1,10 +1,11 @@
 use clap::Parser;
-use trust_dns_resolver::{
-    config::{ResolverConfig, ResolverOpts},
-    TokioAsyncResolver,
-};
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::Write;
+use std::path::Path;
+use trust_dns_resolver::{
+    TokioAsyncResolver,
+    config::{ResolverConfig, ResolverOpts},
+};
 
 #[derive(Parser)]
 #[command(
@@ -22,26 +23,38 @@ struct Args {
         help = "Target domain to enumerate (e.g., 'example.com')"
     )]
     domain: String,
+
+    #[arg(
+        long,
+        short = 'o',
+        default_value = "subdomains.txt",
+        help = "Output file for subdomain results"
+    )]
+    output: String,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
-    let mut output_file = File::create("subdomains.txt")?;
+    let project_dir = env!("CARGO_MANIFEST_DIR");
+    let output_dir = Path::new(project_dir).join("output");
+    fs::create_dir_all(&output_dir)?;
+    let output_path = output_dir.join(&args.output);
+    let mut output_file = File::create(&output_path)?;
 
     println!("\n[+] Target domain: {}", args.domain);
 
-    let resolver = TokioAsyncResolver::tokio(
-        ResolverConfig::default(),
-        ResolverOpts::default(),
-    )?;
+    let resolver = TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default())?;
     println!("[+] DNS resolver initialized: {:?}", resolver);
 
     let root_domain = format!("{}", args.domain);
     resolve_subdomain(&resolver, &root_domain, &mut output_file).await?;
 
-    let common_subdomains = vec!["www", "mail", "ftp", "login", "api", "test", "help", "support", "docs", "pay", "billing", "mobile", "m"];
+    let common_subdomains = vec![
+        "www", "mail", "ftp", "login", "api", "test", "help", "support", "docs", "pay", "billing",
+        "mobile", "m",
+    ];
 
     for subdomain in common_subdomains {
         let fqdn = format!("{}.{}", subdomain, args.domain);
@@ -51,7 +64,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn resolve_subdomain (
+async fn resolve_subdomain(
     resolver: &TokioAsyncResolver,
     fqdn: &str,
     output_file: &mut File,
@@ -64,7 +77,7 @@ async fn resolve_subdomain (
                 writeln!(output_file, "{} -> {}", fqdn, ip)?;
             }
         }
-        Err(_) => {},
+        Err(_) => {}
     }
     Ok(())
 }
