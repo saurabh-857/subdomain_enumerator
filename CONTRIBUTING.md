@@ -1,6 +1,6 @@
-# Contributing to Subdomain-Enumerator
+# Contributing to subsniffer
 
-Thank you for your interest in contributing to Subdomain-Enumerator! This Rust-based tool for enumerating subdomains and resolving A and AAAA DNS records welcomes contributions from the community. This document outlines the process for contributing to ensure a smooth and consistent development experience.
+Thank you for your interest in contributing to subsniffer! This Rust-based tool for enumerating subdomains and resolving A and AAAA DNS records welcomes contributions from the community. This document outlines the process for contributing to ensure a smooth and consistent development experience.
 
 ### How to Contribute
 
@@ -8,11 +8,11 @@ We follow the standard GitHub Flow for contributions. Please adhere to the follo
 
 1. **Fork the Repository**:
     
-    - Fork the [Subdomain-Enumerator repository](https://github.com/saurabh-857/subdomain_enumerator) to your GitHub account.
+    - Fork the [subsniffer repository](https://github.com/saurabh-857/subsniffer) to your GitHub account.
     - Clone your fork locally:
         
         ```bash
-        git clone https://github.com/your-username/subdomain_enumerator.git
+        git clone https://github.com/your-username/subsniffer.git
         ```
         
 2. **Create a Branch**:
@@ -49,11 +49,11 @@ We follow the standard GitHub Flow for contributions. Please adhere to the follo
         
 6. **Open a Pull Request**:
     
-    - Go to the [main repository](https://github.com/saurabh-857/subdomain_enumerator) and open a pull request from your branch.
+    - Go to the [main repository](https://github.com/saurabh-857/subsniffer) and open a pull request from your branch.
 
 ### Getting Help
 
 If you have questions or need assistance, feel free to:
 
-- Open an issue on the [GitHub repository](https://github.com/saurabh-857/subdomain_enumerator).
+- Open an issue on the [GitHub repository](https://github.com/saurabh-857/subsniffer).
 - Contact the maintainer (Saurabh) via GitHub.
