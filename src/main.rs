@@ -31,6 +31,13 @@ struct Args {
         help = "Output file for subdomain results"
     )]
     output: String,
+
+    #[arg(
+        long,
+        short = 'w',
+        help = "Path to wordlist file for brute-forcing subdomains"
+    )]
+    wordlist: Option<String>,
 }
 
 #[tokio::main]
@@ -51,14 +58,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root_domain = format!("{}", args.domain);
     resolve_subdomain(&resolver, &root_domain, &mut output_file).await?;
 
-    let common_subdomains = vec![
-        "www", "mail", "ftp", "login", "api", "test", "help", "support", "docs", "pay", "billing",
-        "mobile", "m",
-    ];
+    if let Some(wordlist_path) = args.wordlist {
+        if !Path::new(&wordlist_path).exists() {
+            return Err(format!("[!] Wordlist file '{}' not found", wordlist_path).into());
+        }
+        let wordlist = fs::read_to_string(wordlist_path)?;
+        for line in wordlist.lines() {
+            let subdomain = line.trim();
+            if subdomain.is_empty() {
+                continue;
+            }
+            let fqdn = format!("{}.{}", subdomain, args.domain);
+            resolve_subdomain(&resolver, &fqdn, &mut output_file).await?;
+        }
+    } else {
+        let common_subdomains = vec![
+            "www", "mail", "ftp", "login", "api", "test", "help", "support", "docs", "pay",
+            "billing", "mobile", "m",
+        ];
 
-    for subdomain in common_subdomains {
-        let fqdn = format!("{}.{}", subdomain, args.domain);
-        resolve_subdomain(&resolver, &fqdn, &mut output_file).await?;
+        for subdomain in common_subdomains {
+            let fqdn = format!("{}.{}", subdomain, args.domain);
+            resolve_subdomain(&resolver, &fqdn, &mut output_file).await?;
+        }
     }
 
     Ok(())
