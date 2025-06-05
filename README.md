@@ -1,6 +1,6 @@
 # Subdomain-Enumerator
 
-Subdomain-Enumerator is a Rust-based tool for enumerating subdomains of a given domain and resolving their A (IPv4) and AAAA (IPv6) DNS records.
+Subdomain-Enumerator is a linux tool for enumerating subdomains of a given domain and resolving their A (IPv4) and AAAA (IPv6) DNS records.
 
 To run this tool in your local machine, ensure Rust is installed.
 
@@ -18,17 +18,23 @@ git clone https://github.com/saurabh-857/subdomain_enumerator.git
 cd subdomain_enumerator
 ```
 
+3. install
+
+```bash
+cargo install --path .
+```
+
 3. run
 
 - help
 	```bash
-	cargo run -- -h
+	subdomain_enumerator -h
 	```
 	This will display the help the help message.
 	
 - execute
 	```bash
-	cargo run -- -d example.com
+	subdomain_enumerator -d example.com
 	```
 	Replace `example.com` with the domain you want to enumerate.
 
