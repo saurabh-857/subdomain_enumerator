@@ -1,9 +1,9 @@
 [package]
-name = "subdomain_enumerator"       # binary name
+name = "subsniffer"       # binary name
 version = "0.1.0"                   # project version
 edition = "2024"                    # rust edition
 authors = ["Saurabh Soni <saurabh@mail.com>"]
-description = "Subdomain enumerator tool"
+description = "A tool for subdomain enumerating"
 license = "MIT"
 
 [dependencies]
