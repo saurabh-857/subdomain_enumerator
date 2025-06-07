@@ -53,7 +53,7 @@ subsniffer -h
 
 This will show available options and their descriptions:
 
-![[images/help.png]]
+![help screenshot](images/help.png)
 
 ### Examples
 
