@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
@@ -38,25 +38,32 @@ struct Args {
         help = "Path to wordlist file for brute-forcing subdomains"
     )]
     wordlist: Option<String>,
+
+    #[arg(help = "IP version to query ('4' for IPv4, '6' for IPv6, omit for both)")]
+    ip_type: Option<IpType>,
+}
+
+#[derive(ValueEnum, Clone)]
+enum IpType {
+    #[value(name = "4")]
+    IPv4,
+    #[value(name = "6")]
+    IPv6,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
-    let project_dir = env!("CARGO_MANIFEST_DIR");
-    let output_dir = Path::new(project_dir).join("output");
-    fs::create_dir_all(&output_dir)?;
-    let output_path = output_dir.join(&args.output);
-    let mut output_file = File::create(&output_path)?;
+    let mut output_file = File::create(&args.output)?;
 
     println!("\n[+] Target domain: {}", args.domain);
 
     let resolver = TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default())?;
-    println!("[+] DNS resolver initialized: {:?}", resolver);
+    // println!("[+] DNS resolver initialized: {:?}", resolver);
 
     let root_domain = format!("{}", args.domain);
-    resolve_subdomain(&resolver, &root_domain, &mut output_file).await?;
+    resolve_subdomain(&resolver, &root_domain, &mut output_file, &args.ip_type).await?;
 
     if let Some(wordlist_path) = args.wordlist {
         if !Path::new(&wordlist_path).exists() {
@@ -69,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             let fqdn = format!("{}.{}", subdomain, args.domain);
-            resolve_subdomain(&resolver, &fqdn, &mut output_file).await?;
+            resolve_subdomain(&resolver, &fqdn, &mut output_file, &args.ip_type).await?;
         }
     } else {
         let common_subdomains = vec![
@@ -79,7 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         for subdomain in common_subdomains {
             let fqdn = format!("{}.{}", subdomain, args.domain);
-            resolve_subdomain(&resolver, &fqdn, &mut output_file).await?;
+            resolve_subdomain(&resolver, &fqdn, &mut output_file, &args.ip_type).await?;
         }
     }
 
@@ -90,16 +97,33 @@ async fn resolve_subdomain(
     resolver: &TokioAsyncResolver,
     fqdn: &str,
     output_file: &mut File,
+    ip_type: &Option<IpType>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    match resolver.lookup_ip(fqdn).await {
-        Ok(lookup) => {
-            // println!("\n[+] Found IP address for {}.{} are:", subdomain, domain);
-            for ip in lookup.iter() {
-                println!("{} -> {}", fqdn, ip);
-                writeln!(output_file, "{} -> {}", fqdn, ip)?;
+    match ip_type {
+        None => {
+            if let Ok(lookup) = resolver.lookup_ip(fqdn).await {
+                for ip in lookup.iter() {
+                    println!("{} -> {}", fqdn, ip);
+                    writeln!(output_file, "{} -> {}", fqdn, ip)?;
+                }
             }
         }
-        Err(_) => {}
+        Some(IpType::IPv4) => {
+            if let Ok(lookup) = resolver.ipv4_lookup(fqdn).await {
+                for ip in lookup.iter() {
+                    println!("{} -> {}", fqdn, ip);
+                    writeln!(output_file, "{} -> {}", fqdn, ip)?;
+                }
+            }
+        }
+        Some(IpType::IPv6) => {
+            if let Ok(lookup) = resolver.ipv6_lookup(fqdn).await {
+                for ip in lookup.iter() {
+                    println!("{} -> {}", fqdn, ip);
+                    writeln!(output_file, "{} -> {}", fqdn, ip)?;
+                }
+            }
+        }
     }
     Ok(())
 }
