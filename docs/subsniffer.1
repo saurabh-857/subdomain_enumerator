@@ -1,0 +1,63 @@
+.\" Man page for subsniffer
+.\" Generated on June 10, 2025
+.TH SUBSNIFFER 1 "June 10, 2025" "1.0" "User Commands"
+.SH NAME
+subsniffer \- Enumerate subdomains for a given domain using DNS resolution
+.SH SYNOPSIS
+.B subsniffer
+.RB [ -d
+.IR domain ]
+.RB [ -o
+.IR output ]
+.RB [ -w
+.IR wordlist ]
+.RB [ -v ]
+.RB [ ip_type ]
+.SH DESCRIPTION
+.B subsniffer
+is a command-line tool for enumerating subdomains of a specified domain by performing DNS resolution. It uses a wordlist to brute-force subdomains and can query for IPv4, IPv6, or both address types. Results are printed to the console and can optionally be saved to an output file. Verbose mode provides additional details, such as IP addresses for resolved subdomains.
+.SH OPTIONS
+.TP
+.BI -d " domain" ", --domain=" domain
+Specify the target domain to enumerate (e.g., "example.com"). This option is required.
+.TP
+.BI -o " output" ", --output=" output
+Specify the output file to save subdomain results. If not provided, results are printed only to the console.
+.TP
+.BI -w " wordlist" ", --wordlist=" wordlist
+Specify the path to a wordlist file containing potential subdomain names (one per line). This option is required.
+.TP
+.BI -v ", --verbose"
+Enable verbose output, which includes IP addresses for resolved subdomains and indicates when a subdomain cannot be resolved.
+.TP
+.BI ip_type
+Specify the IP version to query: "4" for IPv4, "6" for IPv6. If omitted, both IPv4 and IPv6 are queried.
+.SH EXAMPLES
+.PP
+Enumerate subdomains for example.com using a wordlist:
+.RS
+.B subsniffer -d example.com -w wordlist.txt
+.RE
+.PP
+Enumerate subdomains with verbose output and save results to a file:
+.RS
+.B subsniffer -d example.com -w wordlist.txt -o results.txt -v
+.RE
+.PP
+Enumerate subdomains querying only IPv6 addresses:
+.RS
+.B subsniffer -d example.com -w wordlist.txt -o results.txt --verbose 6
+.RE
+.SH EXIT STATUS
+.TP
+.B 0
+Successful execution.
+.TP
+.B 1
+An error occurred, such as a missing wordlist file or failure to create the output file.
+.SH AUTHOR
+Written by the subsniffer development team.
+.SH BUGS
+Report bugs to the project’s issue tracker.
+.SH SEE ALSO
+.BR nslookup (1)
