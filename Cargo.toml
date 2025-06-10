@@ -1,12 +1,30 @@
 [package]
-name = "subsniffer"       # binary name
-version = "0.1.0"                   # project version
-edition = "2024"                    # rust edition
-authors = ["Saurabh Soni <saurabh@mail.com>"]
-description = "A tool for subdomain enumerating"
+name = "subsniffer"
+version = "0.1.0"
+
+authors = ["Saurabh <saurabh-857>"]
 license = "MIT"
+description = "A lightweight tool for enumerating subdomains using DNS resolution"
+keywords = ["subdomain", "dns", "rust"]
+categories = ["command-line-utilities", "network-programming"]
+
+edition = "2024"
+repository = "https://github.com/saurabh-857/subsniffer"
+readme = "README.md"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
 tokio = { version = "1.45", features = ["full"] }
 trust-dns-resolver = "0.20"
+
+[package.metadata.deb]
+maintainer = "Saurabh <saurabh-857>"
+license-file = ["LICENSE.md", "0"]
+section = "utils"
+
+assets = [
+    ["target/release/subsniffer", "usr/bin/", "755"],
+    ["docs/subsniffer.1", "usr/share/man/man1/subsniffer.1", "644"],
+    ["README.md", "usr/share/doc/subsniffer/README", "644"],
+    ["LICENSE.md", "usr/share/doc/subsniffer/LICENSE", "644"],
+]
